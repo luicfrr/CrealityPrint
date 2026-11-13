@@ -6,8 +6,8 @@
 # folder to reclaim the space. The result is a bundle; it is not installed:
 #   flatpak install --user "$WORK/CrealityPrint-dev.flatpak"
 #
-# JOBS limits parallel compile jobs (default 4): with 16 GB of RAM, more than that runs out of memory
-# on the OpenCV, OCCT and CGAL sources.
+# JOBS is the most compile jobs at once, inside each dependency's build too (default 4). A job of OpenCV,
+# OCCT or CGAL takes 2-4 GB: JOBS=1 peaks around 4 GB, JOBS=4 around 14 GB.
 set -euo pipefail
 
 cd "$(dirname "$0")"

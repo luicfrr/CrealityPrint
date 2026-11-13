@@ -43,6 +43,12 @@ if (NPROC EQUAL 0)
     set(NPROC 1)
 endif ()
 
+# Caps the parallel jobs inside each dependency's own build. Empty uses every processor.
+set(DEP_JOBS "" CACHE STRING "Parallel jobs within each dependency build (empty: all processors)")
+if (DEP_JOBS)
+    set(NPROC ${DEP_JOBS})
+endif ()
+
 set(DESTDIR "${CMAKE_CURRENT_BINARY_DIR}/destdir" CACHE PATH "Destination directory")
 set(DEP_DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}/../DL_CACHE CACHE PATH "Path for downloaded source packages.")
 set(FLATPAK FALSE CACHE BOOL "Toggles various build settings for flatpak, like /usr/local in DESTDIR or not building wxwidgets")

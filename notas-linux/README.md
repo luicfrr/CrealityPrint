@@ -41,7 +41,19 @@ Tudo roda em Flatpak, como usuário: não precisa de `sudo` nem de pacotes `-dev
    ./flatpak/build-fedora.sh
    ```
 
-   O padrão é 4 jobs paralelos, o limite seguro com 16 GB de RAM. Com 8 GB, use `JOBS=2 ./flatpak/build-fedora.sh`. Se o processo for interrompido, rode de novo: os módulos já compilados ficam no cache.
+   `JOBS` é o número máximo de compilações simultâneas, incluindo dentro de cada dependência. Cada uma usa de 2 a 4 GB nos arquivos mais pesados (OpenCV, OCCT, CGAL):
+
+   | `JOBS` | Pico de memória do build | Quando usar |
+   |---|---|---|
+   | 1 | cerca de 4 GB | usando o PC para outras coisas ao mesmo tempo (mais lento: a primeira vez pode passar de 8 horas) |
+   | 2 | cerca de 8 GB | uso leve do PC |
+   | 4 (padrão) | cerca de 14 GB | PC livre, 16 GB de RAM |
+
+   ```bash
+   JOBS=1 ./flatpak/build-fedora.sh
+   ```
+
+   Pode interromper com Ctrl+C e rodar de novo depois. Os módulos já concluídos ficam no cache, e o ccache reaproveita o que já foi compilado dentro do módulo interrompido.
 
 4. Instalar e abrir. O bundle tem o mesmo ID do Creality Print do Flathub, então substitui a instalação de usuário:
 
