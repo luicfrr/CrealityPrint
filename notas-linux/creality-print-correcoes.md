@@ -12,6 +12,7 @@ As correções estão no branch `fix/linux-gnome-and-project-presets` deste fork
 | 6 | Impressão por objeto recusa uma peça baixa impressa antes de uma alta, por "colisão" | Corrigido |
 | 7 | Barra superior e bordas fora do padrão GNOME | Corrigido: botões de janela e cantos arredondados no estilo libadwaita (Wayland) |
 | 8 | Seta laranja atrás do combo de preset do processo | Corrigido; falta confirmar no app |
+| 9 | Menu de contexto da lista de objetos fecha ao soltar o botão direito | Corrigido; falta confirmar no app |
 
 ## 1. Tema escuro
 
@@ -108,6 +109,14 @@ O `Tab.cpp` define `DISABLE_UNDO_SYS`. Com isso, o botão "voltar ao valor do si
 As abas de filamento e de impressora tinham o mesmo problema com esse botão e também com o `m_undo_btn`, que também está fora do layout delas e voltava a aparecer ao sair da busca. Agora os botões que não estão no layout ficam escondidos.
 
 Arquivo: `src/slic3r/GUI/Tab.cpp`.
+
+## 9. Menu de contexto da lista de objetos
+
+A lista de objetos (ImGui, dentro da vista 3D) abria o menu de contexto assim que o botão direito era pressionado. No GTK, um menu aberto enquanto o botão que o abriu ainda está pressionado fecha quando esse botão é solto, então o menu só ficava aberto enquanto você segurava o botão. O menu da cena 3D não tinha o problema porque já abria ao soltar.
+
+Agora, no GTK, o menu da lista abre ao soltar o botão sobre o item, como o da cena 3D. A seleção continua acontecendo ao pressionar. Nas outras plataformas nada muda.
+
+Arquivos: `src/slic3r/GUI/GUI_ObjectList.cpp`, `src/slic3r/GUI/GUI_ObjectList.hpp`.
 
 ## Como compilar
 
