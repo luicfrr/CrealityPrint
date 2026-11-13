@@ -80,6 +80,7 @@ flatpak install --user -y --reinstall flathub io.github.crealityofficial.Crealit
 ```
 
 **Problemas comuns:**
+- *`runtime/org.freedesktop.Sdk/x86_64/<versão> não instalado`*: falta o runtime do `org.flatpak.Builder`, normalmente porque um `flatpak uninstall --unused` o removeu. Instale a versão que o erro mostra, por exemplo `flatpak install --user -y flathub org.freedesktop.Sdk//26.08`. Se ela não existir no Flathub, rode `flatpak update --user -y org.flatpak.Builder`.
 - *Falta de memória* (processo encerrado, sistema travando): reduza os jobs com `JOBS=2`.
 - *`Could not parse version string` ao abrir*: falta o `resources/printers/version.txt`. Ele está neste branch, mas some se você copiar o código sem o git (o `.gitignore` do projeto o ignora).
 
