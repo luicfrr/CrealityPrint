@@ -1,0 +1,110 @@
+diff --git a/src/libslic3r/Preset.cpp b/src/libslic3r/Preset.cpp
+index 198a84d..622f7f7 100644
+--- a/src/libslic3r/Preset.cpp
++++ b/src/libslic3r/Preset.cpp
+@@ -2732,7 +2732,7 @@ std::pair<Preset*, bool> PresetCollection::load_external_preset(
+     }
+ 
+     //BBS: add config related logs
+-    BOOST_LOG_TRIVIAL(debug) << __FUNCTION__ << boost::format(" enter, type %1% , path %2%, name %3%, original_name %4%, inherits %5%")%Preset::get_type_string(m_type) %path %name %original_name %inherits;
++    BOOST_LOG_TRIVIAL(warning) << "[PROJECT_PRESET] " << __FUNCTION__ << boost::format(" enter, type %1% , path %2%, name %3%, original_name %4%, inherits %5%, found %6%")%Preset::get_type_string(m_type) %path %name %original_name %inherits %found;
+     if (select == LoadAndSelect::Never) {
+         // Some filament profile has been selected and modified already.
+         // Check whether this profile is equal to the modified edited profile.
+@@ -2764,7 +2764,7 @@ std::pair<Preset*, bool> PresetCollection::load_external_preset(
+             //    app_config->set(AppConfig::SECTION_FILAMENTS, it->name, "1");
+         }
+         //BBS: add config related logs
+-        BOOST_LOG_TRIVIAL(debug) << __FUNCTION__ << boost::format(" The preset exists and it matches the values stored inside config. using original_name %1%")%original_name;
++        BOOST_LOG_TRIVIAL(warning) << "[PROJECT_PRESET] " << __FUNCTION__ << boost::format(" The preset exists and it matches the values stored inside config. using original_name %1%")%original_name;
+         return std::make_pair(&(*it), false);
+     }
+     // A local printer preset with the project's name but other values is selected below, with the project's
+@@ -2788,7 +2788,7 @@ std::pair<Preset*, bool> PresetCollection::load_external_preset(
+                 //    app_config->set(AppConfig::SECTION_FILAMENTS, it->name, "1");
+             }
+             //BBS: add config related logs
+-            BOOST_LOG_TRIVIAL(debug) << __FUNCTION__ << boost::format(" The preset exists and it matches the values stored inside config. using inherits %1%")%inherits;
++            BOOST_LOG_TRIVIAL(warning) << "[PROJECT_PRESET] " << __FUNCTION__ << boost::format(" The preset exists and it matches the values stored inside config. using inherits %1%")%inherits;
+             return std::make_pair(&(*it), false);
+         }
+     }
+@@ -2813,7 +2813,7 @@ std::pair<Preset*, bool> PresetCollection::load_external_preset(
+                 //    app_config->set(AppConfig::SECTION_FILAMENTS, it->name, "1");
+             }
+             //BBS: add config related logs
+-            BOOST_LOG_TRIVIAL(debug) << __FUNCTION__ << boost::format(" Select the existing preset %1% and override it with new values")%it->name;
++            BOOST_LOG_TRIVIAL(warning) << "[PROJECT_PRESET] " << __FUNCTION__ << boost::format(" Select the existing preset %1% and override it with new values")%it->name;
+             return std::make_pair(&(*it), this->get_edited_preset().is_dirty);
+         }
+ 
+@@ -2878,7 +2878,7 @@ std::pair<Preset*, bool> PresetCollection::load_external_preset(
+             if (select == LoadAndSelect::Always)
+                 this->select_preset(it - m_presets.begin());
+             //BBS: add config related logs
+-            BOOST_LOG_TRIVIAL(debug) << __FUNCTION__ << boost::format(" The preset %1% exists and it matches the values stored inside config.")%new_name;
++            BOOST_LOG_TRIVIAL(warning) << "[PROJECT_PRESET] " << __FUNCTION__ << boost::format(" The preset %1% exists and it matches the values stored inside config.")%new_name;
+             return std::make_pair(&(*it), false);
+         }
+         // Form another profile name.
+@@ -2903,7 +2903,7 @@ std::pair<Preset*, bool> PresetCollection::load_external_preset(
+                 preset.filament_id = parent->filament_id;
+         }
+     }
+-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << " " << preset.name << " filament_id: " << preset.filament_id << " base_id: " << preset.base_id;
++    BOOST_LOG_TRIVIAL(warning) << "[PROJECT_PRESET] " << __FUNCTION__ << " new project preset " << preset.name << " filament_id: " << preset.filament_id << " base_id: " << preset.base_id;
+     if (from_project) {
+         preset.is_project_embedded = true;
+          this->get_edited_preset().is_project_embedded = true;
+diff --git a/src/slic3r/GUI/Plater.cpp b/src/slic3r/GUI/Plater.cpp
+index ef6a62f..9a16e06 100644
+--- a/src/slic3r/GUI/Plater.cpp
++++ b/src/slic3r/GUI/Plater.cpp
+@@ -6975,6 +6975,8 @@ private:
+ 
+ };
+ 
++void log_selected_presets_for_project(const char* stage); // defined next to need_change_preset()
++
+ const std::regex Plater::priv::pattern_bundle(".*[.](amf|amf[.]xml|zip[.]amf|3mf)", std::regex::icase);
+ const std::regex Plater::priv::pattern_3mf(".*3mf", std::regex::icase);
+ const std::regex Plater::priv::pattern_cxprj(".*cxprj", std::regex::icase);
+@@ -9283,6 +9285,7 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
+ #else
+                             preset_bundle->load_config_model(filename.string(), std::move(config), file_version);
+ #endif
++                            log_selected_presets_for_project("after_load_config_model");
+ 
+                             ConfigOption* bed_type_opt = preset_bundle->project_config.option("curr_bed_type");
+                             if (bed_type_opt != nullptr) {
+@@ -10010,6 +10013,9 @@ std::vector<size_t> Plater::priv::load_files(const std::vector<fs::path>& input_
+         SimpleModelMgr::instance().center_3mf_objects_to_plate();
+     }
+     BOOST_LOG_TRIVIAL(error) << __FUNCTION__ << " end";
++    log_selected_presets_for_project("load_files_end");
++    // Later steps (sidebar refresh, printer sync) run from the event loop; log what survives them too.
++    wxGetApp().CallAfter([] { log_selected_presets_for_project("after_load_idle"); });
+ 
+     try
+     {
+@@ -13188,6 +13194,20 @@ void Plater::priv::make_sure_only_one_partplater()
+     update();
+ }
+ 
++// Diagnostics for presets that come back as the system defaults when a project is reopened: logs what
++// is selected at each stage of the load (warning level, the level release builds write).
++void log_selected_presets_for_project(const char* stage)
++{
++    const PresetBundle* bundle = wxGetApp().preset_bundle;
++    if (bundle == nullptr)
++        return;
++    std::string filaments;
++    for (const std::string& name : bundle->filament_presets)
++        filaments += (filaments.empty() ? "" : " | ") + name;
++    BOOST_LOG_TRIVIAL(warning) << "[PROJECT_PRESET] " << stage << ": printer=" << bundle->printers.get_selected_preset_name()
++                               << ", print=" << bundle->prints.get_selected_preset_name() << ", filaments=" << filaments;
++}
++
+ bool Plater::priv::need_change_preset(const Slic3r::DynamicConfig& loaded_config, const PlateDataPtrs& plate_datas, Slic3r::Model& model)
+ {
+     if (wxGetApp().easy_mode()) {
