@@ -11,6 +11,7 @@ As correções estão no branch `fix/linux-gnome-and-project-presets` deste fork
 | 5 | Ctrl+C/Ctrl+V em objetos só funciona depois de vários cliques | Corrigido |
 | 6 | Impressão por objeto recusa uma peça baixa impressa antes de uma alta, por "colisão" | Corrigido |
 | 7 | Barra superior e bordas fora do padrão GNOME | Corrigido: botões de janela e cantos arredondados no estilo libadwaita (Wayland) |
+| 8 | Seta laranja atrás do combo de preset do processo | Corrigido; falta confirmar no app |
 
 ## 1. Tema escuro
 
@@ -99,6 +100,14 @@ Cantos ampliados (superior esquerdo e direito, inferior esquerdo, que é da vist
 Botões ampliados, com a janela normal (em cima) e maximizada, com o ícone de restaurar (embaixo):
 
 ![Botões](images/crealityprint-gnome-botoes-zoom.png)
+
+## 8. Seta laranja atrás do combo de preset
+
+O `Tab.cpp` define `DISABLE_UNDO_SYS`. Com isso, o botão "voltar ao valor do sistema" (`m_undo_to_sys_btn`) é criado, recebe ícone e tooltip, mas não entra no layout nem é escondido, e fica parado no canto superior esquerdo do painel. Na aba de processo da barra lateral, isso aparece como uma seta laranja atrás do combo, que não some junto com a seta de desfazer da direita, porque são botões diferentes.
+
+As abas de filamento e de impressora tinham o mesmo problema com esse botão e também com o `m_undo_btn`, que também está fora do layout delas e voltava a aparecer ao sair da busca. Agora os botões que não estão no layout ficam escondidos.
+
+Arquivo: `src/slic3r/GUI/Tab.cpp`.
 
 ## Como compilar
 
