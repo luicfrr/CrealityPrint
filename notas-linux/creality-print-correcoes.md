@@ -6,7 +6,7 @@ As correções estão no branch `fix/linux-gnome-and-project-presets` deste fork
 |---|---|---|
 | 1 | Tema escuro indisponível no Linux/Flatpak | Corrigido |
 | 2 | Ao reabrir um projeto, impressora, processo e filamentos voltam aos padrões (Hyper PLA/PETG, 0.20mm Standard) | Corrigido (causa encontrada com `letreiro-feliz-natal.3mf`) |
-| 3 | Campo "Multiplier" dos volumes de purga não aparece | Provável correção (diálogo cortado no GTK) |
+| 3 | Campo "Multiplier" e ícones de cor dos volumes de purga não aparecem | Corrigido (reproduzido com wxWidgets 3.3.2); falta confirmar no app |
 | 4 | Pré-visualização mostra só o custo do filamento, sem a hora-máquina | Corrigido |
 | 5 | Ctrl+C/Ctrl+V em objetos só funciona depois de vários cliques | Corrigido |
 | 6 | Impressão por objeto recusa uma peça baixa impressa antes de uma alta, por "colisão" | Corrigido |
@@ -38,13 +38,18 @@ Ao abrir `letreiro-feliz-natal.3mf`, a impressora aparecia como "Padrão Hi 0.4 
 
 Projetos salvos enquanto o problema existia podem ter nomes como "PETG 245º - Padrão R$70,00(grinch_natal.3mf)" (é o caso de `grinch_natal_c_cadeira.3mf`). Esses nomes não existem localmente, então o preset do projeto continua sendo usado. Para corrigir, escolha o seu preset de novo e salve o projeto.
 
-## 3. Multiplier dos volumes de purga
+## 3. Multiplier e ícones de cor dos volumes de purga
 
-O campo existe (`WipingPanel`, na última linha da página de volumes), mas o diálogo não era redimensionável e calculava a altura antes de o GTK saber a altura real das caixas de texto. A última linha, com o Multiplier, podia ficar fora da janela. Agora o diálogo é redimensionável e, no GTK, recalcula o tamanho depois de exibido.
+A primeira tentativa (diálogo redimensionável, reajustado depois de exibido) partiu de um diagnóstico errado e foi desfeita. A linha do Multiplier estava no layout; o GTK é que não desenhava parte do diálogo. A captura mostrava também que os quadrados de cor do cabeçalho e da primeira coluna tinham sumido.
 
-**Não confirmado:** se o campo continuar sumido, mande um print do diálogo.
+As duas causas foram reproduzidas num programa mínimo com o wxWidgets 3.3.2 (a versão do Flatpak) e o GTK 3.24 com tema Adwaita escuro:
 
-Arquivo: `src/slic3r/GUI/WipeTowerDialog.cpp`.
+- **Ícones de cor:** eram `wxButton` de 16 px. O tema do GTK exige mais padding e borda do que isso (o GTK avisa `Negative content width -4 … owner GtkButton`), então a imagem fica sem espaço e não é desenhada. Agora são `wxStaticBitmap`; ninguém tratava clique neles.
+- **Valor do Multiplier:** o campo usava a cor de texto do tema. No tema escuro ela é `#FFFFFF`, e a passagem de modo escuro do diálogo (`UpdateDarkUI`) trata `#FFFFFF` como fundo de janela e a troca por `#4B4B4D`, o mesmo cinza do diálogo. O texto sumia. Agora o campo define a cor do texto como as caixas da matriz já faziam. A tabela de cores da Creality usa `#FFFFFE` para texto branco justamente para escapar desse remapeamento.
+
+Causa de fundo, não corrigida por mexer no app inteiro: o `StateColor::GetLightness` calcula a luminosidade sem a correção gama do sRGB (dá L=61 para `#4B4B4D`, quando o certo é cerca de 32). Por isso a proteção do `UpdateDarkUI` contra texto escuro demais nunca dispara. Outros campos de texto nativos em diálogos podem ter o mesmo problema.
+
+Arquivos: `src/slic3r/GUI/WipeTowerDialog.cpp`, `src/slic3r/GUI/WipeTowerDialog.hpp`.
 
 ## 4. Custo da hora-máquina
 
