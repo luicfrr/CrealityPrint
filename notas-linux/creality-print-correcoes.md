@@ -13,6 +13,7 @@ As correções estão no branch `fix/linux-gnome-and-project-presets` deste fork
 | 7 | Barra superior e bordas fora do padrão GNOME | Corrigido: botões de janela e cantos arredondados no estilo libadwaita (Wayland) |
 | 8 | Seta laranja atrás do combo de preset do processo | Corrigido; falta confirmar no app |
 | 9 | Menu de contexto da lista de objetos fecha ao soltar o botão direito | Corrigido; falta confirmar no app |
+| 10 | Páginas alteradas não aparecem destacadas na lista do diálogo de filamento | Provável correção; falta confirmar no app |
 
 ## 1. Tema escuro
 
@@ -117,6 +118,16 @@ A lista de objetos (ImGui, dentro da vista 3D) abria o menu de contexto assim qu
 Agora, no GTK, o menu da lista abre ao soltar o botão sobre o item, como o da cena 3D. A seleção continua acontecendo ao pressionar. Nas outras plataformas nada muda.
 
 Arquivos: `src/slic3r/GUI/GUI_ObjectList.cpp`, `src/slic3r/GUI/GUI_ObjectList.hpp`.
+
+## 10. Páginas alteradas sem destaque na lista do diálogo
+
+O nome das páginas (Filament, Cooling, Setting Overrides…) deveria ficar amarelo (`#EBC406`) quando a página tem valores alterados. A lista de páginas de cada aba agora só é montada quando a aba é exibida pela primeira vez (`request_page_tree_rebuild()`), e o cálculo das cores (`update_changed_tree_ui()`) não faz nada enquanto a lista não tem itens. Um preset carregado já com alterações, por exemplo de um projeto, tinha as cores calculadas antes de a lista existir; ao abrir o diálogo, a lista era montada com as cores padrão, e nenhuma página mostrava onde estavam as alterações, até você mudar algum valor.
+
+Agora a lista recalcula as cores sempre que é montada.
+
+**Não reproduzido no app:** a causa foi encontrada lendo o código. Se as páginas continuarem sem destaque, anote qual campo estava alterado e em que página, e se o preset foi alterado no diálogo ou veio de um projeto.
+
+Arquivo: `src/slic3r/GUI/Tab.cpp`.
 
 ## Como compilar
 
