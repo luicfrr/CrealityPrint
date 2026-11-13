@@ -8,7 +8,7 @@ As correções estão no branch `fix/linux-gnome-and-project-presets` deste fork
 | 2 | Ao reabrir um projeto, impressora, processo e filamentos voltam aos padrões (Hyper PLA/PETG, 0.20mm Standard) | Corrigido (causa encontrada com `letreiro-feliz-natal.3mf`) |
 | 3 | Campo "Multiplier" e ícones de cor dos volumes de purga não aparecem | Corrigido e confirmado no app |
 | 4 | Pré-visualização mostra só o custo do filamento, sem a hora-máquina | Corrigido |
-| 5 | Ctrl+C/Ctrl+V em objetos só funciona depois de vários cliques | Corrigido |
+| 5 | Ctrl+C/Ctrl+V e Delete em objetos só funcionam depois de vários cliques | Ctrl+C/V corrigido e confirmado; Delete corrigido, falta confirmar no app |
 | 6 | Impressão por objeto recusa uma peça baixa impressa antes de uma alta, por "colisão" | Corrigido |
 | 7 | Barra superior e bordas fora do padrão GNOME | Corrigido: botões de janela e cantos arredondados no estilo libadwaita (Wayland) |
 | 8 | Seta laranja atrás do combo de preset do processo | Corrigido; falta confirmar no app |
@@ -67,7 +67,7 @@ Arquivo: `src/slic3r/GUI/GCodeRenderer/BaseRenderer.cpp`.
 
 ## 5. Ctrl+C / Ctrl+V
 
-A lista de objetos é desenhada com ImGui dentro da área 3D. Depois de um clique nela, o ImGui reivindicava o teclado (`WantCaptureKeyboard`), e o `GLCanvas3D::on_char` descartava a tecla antes de chegar ao atalho de copiar. Só um clique em outro ponto da placa devolvia o teclado. Agora Ctrl+C, Ctrl+V e Ctrl+X passam sempre, a não ser que um campo de texto esteja em edição.
+A lista de objetos é desenhada com ImGui dentro da área 3D. Depois de um clique nela, o ImGui reivindicava o teclado (`WantCaptureKeyboard`), e o `GLCanvas3D::on_char` descartava a tecla antes de chegar ao atalho de copiar. Só um clique em outro ponto da placa devolvia o teclado. Agora Ctrl+C, Ctrl+V, Ctrl+X e Delete (no macOS também Backspace) passam sempre, a não ser que um campo de texto esteja em edição. O Delete tinha o mesmo problema e foi incluído depois.
 
 Arquivo: `src/slic3r/GUI/GLCanvas3D.cpp`.
 
