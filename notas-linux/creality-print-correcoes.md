@@ -6,7 +6,7 @@ As correções estão no branch `fix/linux-gnome-and-project-presets` deste fork
 |---|---|---|
 | 1 | Tema escuro indisponível no Linux/Flatpak | Corrigido |
 | 2 | Ao reabrir um projeto, impressora, processo e filamentos voltam aos padrões (Hyper PLA/PETG, 0.20mm Standard) | Corrigido (causa encontrada com `letreiro-feliz-natal.3mf`) |
-| 3 | Campo "Multiplier" e ícones de cor dos volumes de purga não aparecem | Corrigido (reproduzido com wxWidgets 3.3.2); falta confirmar no app |
+| 3 | Campo "Multiplier" e ícones de cor dos volumes de purga não aparecem | Corrigido e confirmado no app |
 | 4 | Pré-visualização mostra só o custo do filamento, sem a hora-máquina | Corrigido |
 | 5 | Ctrl+C/Ctrl+V em objetos só funciona depois de vários cliques | Corrigido |
 | 6 | Impressão por objeto recusa uma peça baixa impressa antes de uma alta, por "colisão" | Corrigido |
