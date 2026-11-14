@@ -100,6 +100,6 @@ Built with the repository's Flatpak manifest (GNOME SDK 50, Clang 21) on Fedora 
 - **Page list:** opened the filament settings dialog for a filament with unsaved changes; the pages that hold them are highlighted.
 - **Startup:** the crash was reproduced on the first build (no `version.txt`, `Could not parse version string:` from `get_printer_config_updates()`); the tested build ships the file, so the new guard itself was not exercised.
 - **GNOME look:** see the screenshots above. Windowed: rounded corners on all four sides, including the OpenGL corner. Maximized: square corners and the restore glyph. Not tested on X11 or Windows, where this code is not compiled or not active.
-- **After the merge with `master`:** the files this PR changes were checked to compile; the merged branch was not built or run again. `GUI_App.cpp` was not compiled outside the full build, but this PR's change to it is identical before and after the merge, and `master` did not change the dark-mode code around it.
+- **After the merge with `master`:** the merged branch was built with the same Flatpak manifest, and the fixes above were checked again.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

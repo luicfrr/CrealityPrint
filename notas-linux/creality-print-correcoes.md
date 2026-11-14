@@ -8,12 +8,12 @@ As correções estão no branch `fix/linux-gnome-and-project-presets` deste fork
 | 2 | Ao reabrir um projeto, impressora, processo e filamentos voltam aos padrões (Hyper PLA/PETG, 0.20mm Standard) | Corrigido (causa encontrada com `letreiro-feliz-natal.3mf`) |
 | 3 | Campo "Multiplier" e ícones de cor dos volumes de purga não aparecem | Corrigido e confirmado no app |
 | 4 | Pré-visualização mostra só o custo do filamento, sem a hora-máquina | Corrigido |
-| 5 | Ctrl+C/Ctrl+V e Delete em objetos só funcionam depois de vários cliques | Ctrl+C/V corrigido e confirmado; Delete corrigido, falta confirmar no app |
+| 5 | Ctrl+C/Ctrl+V e Delete em objetos só funcionam depois de vários cliques | Corrigido e confirmado no app |
 | 6 | Impressão por objeto recusa uma peça baixa impressa antes de uma alta, por "colisão" | Corrigido |
 | 7 | Barra superior e bordas fora do padrão GNOME | Corrigido: botões de janela e cantos arredondados no estilo libadwaita (Wayland) |
-| 8 | Seta laranja atrás do combo de preset do processo | Corrigido; falta confirmar no app |
-| 9 | Menu de contexto da lista de objetos fecha ao soltar o botão direito | Corrigido; falta confirmar no app |
-| 10 | Páginas alteradas não aparecem destacadas na lista do diálogo de filamento | Provável correção; falta confirmar no app |
+| 8 | Seta laranja atrás do combo de preset do processo | Corrigido e confirmado no app |
+| 9 | Menu de contexto da lista de objetos fecha ao soltar o botão direito | Corrigido e confirmado no app |
+| 10 | Páginas alteradas não aparecem destacadas na lista do diálogo de filamento | Corrigido e confirmado no app |
 
 ## 1. Tema escuro
 
@@ -124,8 +124,6 @@ Arquivos: `src/slic3r/GUI/GUI_ObjectList.cpp`, `src/slic3r/GUI/GUI_ObjectList.hp
 O nome das páginas (Filament, Cooling, Setting Overrides…) deveria ficar amarelo (`#EBC406`) quando a página tem valores alterados. A lista de páginas de cada aba agora só é montada quando a aba é exibida pela primeira vez (`request_page_tree_rebuild()`), e o cálculo das cores (`update_changed_tree_ui()`) não faz nada enquanto a lista não tem itens. Um preset carregado já com alterações, por exemplo de um projeto, tinha as cores calculadas antes de a lista existir; ao abrir o diálogo, a lista era montada com as cores padrão, e nenhuma página mostrava onde estavam as alterações, até você mudar algum valor.
 
 Agora a lista recalcula as cores sempre que é montada.
-
-**Não reproduzido no app:** a causa foi encontrada lendo o código. Se as páginas continuarem sem destaque, anote qual campo estava alterado e em que página, e se o preset foi alterado no diálogo ou veio de um projeto.
 
 Arquivo: `src/slic3r/GUI/Tab.cpp`.
 
