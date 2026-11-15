@@ -3971,14 +3971,14 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
         keyCode == WXK_DELETE;
 #endif
     const bool object_shortcut = clipboard_shortcut || delete_shortcut;
-    const bool delete_debug = keyCode == WXK_DELETE; // [DELETE_DEBUG] local diagnostics, not part of the pull request
+    const bool delete_debug = object_shortcut || keyCode == WXK_DELETE; // [KEY_DEBUG] local diagnostics, not part of the pull request
     if (delete_debug)
-        BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] on_char modifiers=" << evt.GetModifiers()
+        BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char key=" << keyCode << " modifiers=" << evt.GetModifiers()
                                    << " imgui_keyboard=" << imgui->want_keyboard() << " imgui_text=" << imgui->want_text_input()
                                    << " gizmo=" << int(m_gizmos.get_current_type()) << " selection_empty=" << m_selection.is_empty();
     if (imgui->update_key_data(evt) && !(object_shortcut && !imgui->want_text_input())) {
         if (delete_debug)
-            BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] on_char: kept by ImGui";
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char: kept by ImGui";
         render();
         return;
     }
@@ -3995,14 +3995,14 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
 
     if (m_gizmos.on_char(evt)) {
         if (delete_debug)
-            BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] on_char: kept by the gizmo";
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char: kept by the gizmo";
         return;
     }
 
     auto obj_list = wxGetApp().obj_list();
     if (obj_list->on_char(evt)) {
         if (delete_debug)
-            BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] on_char: kept by the object list";
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char: kept by the object list";
         return;
     }
 
@@ -4037,6 +4037,7 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
 #else  /* __APPLE__ */
         case WXK_CONTROL_C:
 #endif /* __APPLE__ */
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char: copy painting=" << is_in_painting_mode;
             if (!is_in_painting_mode)
                 post_event(SimpleEvent(EVT_GLTOOLBAR_COPY));
             break;
@@ -4073,6 +4074,7 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
 #else  /* __APPLE__ */
         case WXK_CONTROL_V:
 #endif /* __APPLE__ */
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char: paste painting=" << is_in_painting_mode;
             if (!is_in_painting_mode)
                 post_event(SimpleEvent(EVT_GLTOOLBAR_PASTE));
             break;
@@ -4083,6 +4085,7 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
 #else  /* __APPLE__ */
         case WXK_CONTROL_X:
 #endif /* __APPLE__ */
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char: cut painting=" << is_in_painting_mode;
             if (!is_in_painting_mode)
                 post_event(SimpleEvent(EVT_GLTOOLBAR_CUT));
             break;
@@ -4187,7 +4190,7 @@ void GLCanvas3D::on_char(wxKeyEvent& evt)
         switch (keyCode) {
         // case WXK_BACK:
         case WXK_DELETE: {
-            BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] on_char: posting delete";
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_char: posting delete";
             post_event(SimpleEvent(EVT_GLTOOLBAR_DELETE));
             break;
         }
@@ -4469,8 +4472,8 @@ void GLCanvas3D::on_key(wxKeyEvent& evt)
     const int keyCode = evt.GetKeyCode();
 
     auto imgui = wxGetApp().imgui();
-    if (keyCode == WXK_DELETE) // [DELETE_DEBUG] local diagnostics, not part of the pull request
-        BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] on_key " << (evt.GetEventType() == wxEVT_KEY_DOWN ? "down" : "up")
+    if (keyCode == WXK_DELETE || (evt.ControlDown() && (keyCode == 'C' || keyCode == 'V' || keyCode == 'X'))) // [KEY_DEBUG] local diagnostics, not part of the pull request
+        BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] on_key key=" << keyCode << " " << (evt.GetEventType() == wxEVT_KEY_DOWN ? "down" : "up")
                                    << " imgui_keyboard=" << imgui->want_keyboard() << " imgui_text=" << imgui->want_text_input()
                                    << " gizmo=" << int(m_gizmos.get_current_type()) << " selection_empty=" << m_selection.is_empty();
     if (imgui->update_key_data(evt)) {
@@ -5158,9 +5161,20 @@ void GLCanvas3D::on_mouse(wxMouseEvent& evt)
         m_mouse.set_move_start_threshold_position_2D_as_invalid();
     }
 
+    if (evt.ButtonDown()) { // [KEY_DEBUG] local diagnostics, not part of the pull request
+        wxWindow* focus = wxWindow::FindFocus();
+        BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] click focus_before=" << (focus ? wxString(focus->GetClassInfo()->GetClassName()).ToStdString() : std::string("(none)"))
+                                   << " canvas_had_focus=" << (focus == m_canvas);
+    }
     if (evt.ButtonDown() && wxWindow::FindFocus() != m_canvas)
         // Grab keyboard focus on any mouse click event.
         m_canvas->SetFocus();
+    if (evt.ButtonDown()) { // [KEY_DEBUG]
+        auto imgui_dbg = wxGetApp().imgui();
+        BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] click canvas_has_focus=" << (wxWindow::FindFocus() == m_canvas)
+                                   << " imgui_keyboard=" << imgui_dbg->want_keyboard() << " imgui_text=" << imgui_dbg->want_text_input()
+                                   << " selection_empty=" << m_selection.is_empty();
+    }
 
     // on Windows, (left button down + shift) is used to move the bed;
     // on MacOS, (left button down + shift) is used to retangle select objects

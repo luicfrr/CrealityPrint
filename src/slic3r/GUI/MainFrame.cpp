@@ -718,10 +718,11 @@ MainFrame::MainFrame()
             });
 ;    }
     this->Bind(wxEVT_CHAR_HOOK, [this](wxKeyEvent &evt) {
-        // [DELETE_DEBUG] local diagnostics, not part of the pull request
-        if (evt.GetKeyCode() == WXK_DELETE) {
+        // [KEY_DEBUG] local diagnostics, not part of the pull request
+        if (evt.GetKeyCode() == WXK_DELETE ||
+            (evt.ControlDown() && (evt.GetKeyCode() == 'C' || evt.GetKeyCode() == 'V' || evt.GetKeyCode() == 'X'))) {
             wxWindow* focus = wxWindow::FindFocus();
-            BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] char_hook focus=" << (focus ? wxString(focus->GetClassInfo()->GetClassName()).ToStdString() : std::string("(none)"))
+            BOOST_LOG_TRIVIAL(warning) << "[KEY_DEBUG] char_hook key=" << evt.GetKeyCode() << " ctrl=" << evt.ControlDown() << " focus=" << (focus ? wxString(focus->GetClassInfo()->GetClassName()).ToStdString() : std::string("(none)"))
                                        << " name=" << (focus ? focus->GetName().ToStdString() : std::string());
         }
 #ifdef __APPLE__
