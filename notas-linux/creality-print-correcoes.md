@@ -141,7 +141,6 @@ O CrealityPrint 7.3 não compila direto no Fedora 45, porque pede o `webkit2gtk-
 
 Ajustes feitos no manifesto (`flatpak/io.github.crealityofficial.CrealityPrint.yml`):
 - versão 7.3.1 em vez de 6.0.0, para o app usar a mesma pasta de configuração (`Creality Print/7.3`) e os seus presets;
-- 4 jobs de compilação (`--jobs`), para não faltar memória;
 - o módulo das dependências recebe só `deps/` e `cmake/`, para uma mudança no código não recompilar todas as dependências;
 - o `env` do módulo do app foi movido para `build-options`, onde o flatpak-builder o lê;
 - o `run_gettext.sh` é chamado com `bash`, porque o arquivo não tem permissão de execução no repositório.

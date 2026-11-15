@@ -8,6 +8,8 @@ Este branch (`linux-dev`) parte de `fix/linux-gnome-and-project-presets`, o bran
 | [`instalado-no-sistema.md`](instalado-no-sistema.md) | Pacotes e arquivos instalados para os builds (CrealityPrint e o antigo OrcaSlicer), com os comandos para remover |
 | [`diagnostico-project-preset.patch`](diagnostico-project-preset.patch) | Logs `[PROJECT_PRESET]` usados para achar o problema dos presets perdidos |
 | [`images/`](images) | Capturas do visual GNOME (botões e cantos) |
+| [`protocolo-websocket-9999.md`](protocolo-websocket-9999.md) | Comandos que a aba Dispositivo envia à impressora (CFS, temperaturas, câmera…), para referência |
+| [`pr-661-descricao.md`](pr-661-descricao.md) | Descrição atual do PR no repositório oficial, para copiar no GitHub |
 | [`../flatpak/build-fedora.sh`](../flatpak/build-fedora.sh) | Gera o Flatpak no Fedora sem sudo |
 | `../resources/printers/version.txt` | Versão dos perfis; o `.gitignore` do projeto o deixa de fora, e sem ele o app fechava ao abrir |
 
@@ -41,17 +43,7 @@ Tudo roda em Flatpak, como usuário: não precisa de `sudo` nem de pacotes `-dev
    ./flatpak/build-fedora.sh
    ```
 
-   `JOBS` é o número máximo de compilações simultâneas, incluindo dentro de cada dependência. Cada uma usa de 2 a 4 GB nos arquivos mais pesados (OpenCV, OCCT, CGAL):
-
-   | `JOBS` | Pico de memória do build | Quando usar |
-   |---|---|---|
-   | 1 | cerca de 4 GB | usando o PC para outras coisas ao mesmo tempo (mais lento: a primeira vez pode passar de 8 horas) |
-   | 2 | cerca de 8 GB | uso leve do PC |
-   | 4 (padrão) | cerca de 14 GB | PC livre, 16 GB de RAM |
-
-   ```bash
-   JOBS=1 ./flatpak/build-fedora.sh
-   ```
+   O build usa todos os núcleos do processador, e cada compilação dos arquivos mais pesados (OpenCV, OCCT, CGAL) usa de 2 a 4 GB, então a primeira vez pode ocupar quase toda a memória. Deixe rodando num momento em que não esteja usando o PC.
 
    Pode interromper com Ctrl+C e rodar de novo depois. Os módulos já concluídos ficam no cache, e o ccache reaproveita o que já foi compilado dentro do módulo interrompido.
 
@@ -81,7 +73,7 @@ flatpak install --user -y --reinstall flathub io.github.crealityofficial.Crealit
 
 **Problemas comuns:**
 - *`runtime/org.freedesktop.Sdk/x86_64/<versão> não instalado`*: falta o runtime do `org.flatpak.Builder`, normalmente porque um `flatpak uninstall --unused` o removeu. Instale a versão que o erro mostra, por exemplo `flatpak install --user -y flathub org.freedesktop.Sdk//26.08`. Se ela não existir no Flathub, rode `flatpak update --user -y org.flatpak.Builder`.
-- *Falta de memória* (processo encerrado, sistema travando): reduza os jobs com `JOBS=2`.
+- *Falta de memória* (processo encerrado, sistema travando): feche outros programas e rode de novo; o build continua de onde parou.
 - *`Could not parse version string` ao abrir*: falta o `resources/printers/version.txt`. Ele está neste branch, mas some se você copiar o código sem o git (o `.gitignore` do projeto o ignora).
 
 Quando o branch do PR receber commits novos, traga-os para cá:

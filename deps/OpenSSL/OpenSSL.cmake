@@ -1,9 +1,6 @@
 
-# NPROC comes from deps/CMakeLists.txt, which may cap it with DEP_JOBS.
-if (NOT NPROC)
-    include(ProcessorCount)
-    ProcessorCount(NPROC)
-endif ()
+include(ProcessorCount)
+ProcessorCount(NPROC)
 
 if(DEFINED OPENSSL_ARCH)
     set(_cross_arch ${OPENSSL_ARCH})
