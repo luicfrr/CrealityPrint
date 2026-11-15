@@ -127,6 +127,8 @@ O nome das páginas (Filament, Cooling, Setting Overrides…) deveria ficar amar
 
 Agora a lista recalcula as cores sempre que é montada.
 
+Havia uma segunda causa, achada por você no teste com o Setting Overrides: a cor de "igual ao sistema" tinha prioridade sobre a de "alterado". Com o Length em 1.5, igual ao perfil pai, mas diferente do 1.6 salvo no seu preset, a página tinha uma alteração não salva (o campo mostrava a seta), mas todos os valores dela eram iguais aos do pai, e ela ganhava a cor normal. Como os botões de "voltar ao sistema" estão desativados no Creality Print (`DISABLE_UNDO_SYS`), esse estado não tem marca própria na interface. Agora uma alteração não salva sempre destaca a página.
+
 Arquivo: `src/slic3r/GUI/Tab.cpp`.
 
 ## Como compilar

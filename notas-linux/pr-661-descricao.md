@@ -56,8 +56,9 @@ In the sidebar's process tab, an orange arrow showed behind the left edge of the
 ### 10. Modified settings pages are not marked in the page list
 The preset name shows `*` when a filament has unsaved changes, but in the filament settings dialog no page (Filament, Cooling, Setting Overrides, …) was marked, so finding the change meant opening every page.
 
-- **Cause:** `update_changed_tree_ui()` colours the pages that hold modified values, but returns at once while the tab's page list has no items. The list is built only when the tab is first shown (`request_page_tree_rebuild()`), so for a preset loaded with changes, for example from a project, the colours were worked out before the list existed, and the list was then built with the default colours.
-- **Fix** (`Tab.cpp`): `rebuild_page_tree()` works the colours out again once the items exist.
+- **Cause 1:** `update_changed_tree_ui()` colours the pages that hold modified values, but returns at once while the tab's page list has no items. The list is built only when the tab is first shown (`request_page_tree_rebuild()`), so for a preset loaded with changes, for example from a project, the colours were worked out before the list existed, and the list was then built with the default colours.
+- **Cause 2:** the "same as system" colour took precedence over the modified one. A value changed back to the parent preset's (here a filament override set to the system profile's value) is still an unsaved change, and the field shows its undo arrow, but the page was not marked because all its values matched the parent. With `DISABLE_UNDO_SYS` that state has no mark of its own in the UI.
+- **Fix** (`Tab.cpp`): `rebuild_page_tree()` works the colours out again once the items exist, and an unsaved change always marks its page.
 
 ### 11. Robustness and Flatpak build
 - `PresetUpdater.cpp`: a missing or unreadable `resources/printers/version.txt` no longer aborts startup. Assigning the empty string to `Version::config_version` went through Semver's throwing constructor; the file is ignored by `.gitignore`, so builds from a clean checkout crashed with `Could not parse version string:`.
@@ -99,7 +100,7 @@ Built with the repository's Flatpak manifest (GNOME SDK 50, Clang 21) on Fedora 
 - **Sequential clearance:** a 1 mm part listed before a tall vase within the extruder clearance radius now slices.
 - **Undo arrow:** the stray arrow behind the process preset combo is gone; the undo arrow on the right still appears when a value is changed.
 - **Context menu:** right-click on an object and on a plate in the object list; the menu stays open after the button is released and its actions work.
-- **Page list:** opened the filament settings dialog for a filament with unsaved changes; the pages that hold them are highlighted.
+- **Page list:** opened the filament settings dialog for a filament with unsaved changes; the pages that hold them are highlighted, including a Setting Overrides value changed back to the parent profile's value.
 - **Startup:** the crash was reproduced on the first build (no `version.txt`, `Could not parse version string:` from `get_printer_config_updates()`); the tested build ships the file, so the new guard itself was not exercised.
 - **GNOME look:** see the screenshots above. Windowed: rounded corners on all four sides, including the OpenGL corner. Maximized: square corners and the restore glyph. Not tested on X11 or Windows, where this code is not compiled or not active.
 - **After the merge with `master`:** the merged branch was built with the same Flatpak manifest, and the fixes above were checked again.
