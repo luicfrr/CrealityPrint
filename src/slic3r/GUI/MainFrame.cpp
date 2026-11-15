@@ -722,7 +722,9 @@ MainFrame::MainFrame()
         if (evt.GetKeyCode() == WXK_DELETE) {
             wxWindow* focus = wxWindow::FindFocus();
             BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] char_hook focus=" << (focus ? wxString(focus->GetClassInfo()->GetClassName()).ToStdString() : std::string("(none)"))
-                                       << " name=" << (focus ? focus->GetName().ToStdString() : std::string());
+                                       << " name=" << (focus ? focus->GetName().ToStdString() : std::string())
+                                       << " is_canvas=" << (focus != nullptr && m_plater != nullptr && m_plater->get_current_canvas3D() != nullptr &&
+                                                            focus == m_plater->get_current_canvas3D()->get_wxglcanvas());
         }
 #ifdef __APPLE__
         if (evt.CmdDown() && (evt.GetKeyCode() == 'H')) {
