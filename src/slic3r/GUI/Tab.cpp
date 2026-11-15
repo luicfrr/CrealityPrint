@@ -1780,6 +1780,15 @@ void Tab::update_changed_tree_ui()
         return;
     }
     auto cur_item = m_tabctrl->GetFirstVisibleItem();
+    const bool page_debug = m_type == Preset::TYPE_FILAMENT; // [PAGE_DEBUG] local diagnostics, not part of the pull request
+    if (page_debug) {
+        std::string modified;
+        for (const auto& [key, status] : m_options_list)
+            if ((status & osInitValue) == 0)
+                modified += key + " ";
+        BOOST_LOG_TRIVIAL(warning) << "[PAGE_DEBUG] tree_ui first_item=" << cur_item << " items_visible=" << (cur_item >= 0 && m_tabctrl->IsVisible(cur_item))
+                                   << " preset_dirty=" << m_presets->get_edited_preset().is_dirty << " modified_keys=" << modified;
+    }
     if (cur_item < 0 || !m_tabctrl->IsVisible(cur_item))
         return;
 
@@ -1828,8 +1837,11 @@ void Tab::update_changed_tree_ui()
                         if (conditionally_hidden)
                             break;
                     }
-                    if (conditionally_hidden)
+                    if (conditionally_hidden) {
+                        if (page_debug)
+                            BOOST_LOG_TRIVIAL(warning) << "[PAGE_DEBUG]   page=" << page->title() << " opt_id=" << kvp.first << " skipped: hidden line";
                         continue;
+                    }
                     // Process variant pages expose the selected row through the
                     // field index, while update_changed_ui() records the status
                     // under the base option key for the active variant.
@@ -1839,6 +1851,13 @@ void Tab::update_changed_tree_ui()
                     const std::string status_key = use_process_variant_status || kvp.second.second < 0
                         ? kvp.second.first
                         : kvp.second.first + "#" + std::to_string(kvp.second.second);
+                    if (page_debug) {
+                        auto found = m_options_list.find(status_key);
+                        if (found == m_options_list.end())
+                            BOOST_LOG_TRIVIAL(warning) << "[PAGE_DEBUG]   page=" << page->title() << " opt_id=" << kvp.first << " status_key=" << status_key << " NOT IN LIST";
+                        else if ((found->second & osInitValue) == 0)
+                            BOOST_LOG_TRIVIAL(warning) << "[PAGE_DEBUG]   page=" << page->title() << " opt_id=" << kvp.first << " status_key=" << status_key << " modified status=" << found->second;
+                    }
                     get_sys_and_mod_flags(status_key, sys_page, modified_page);
                 }
             }
@@ -1854,6 +1873,9 @@ void Tab::update_changed_tree_ui()
 
             page->m_is_nonsys_values = !sys_page;
             page->m_is_modified_values = modified_page;
+            if (page_debug)
+                BOOST_LOG_TRIVIAL(warning) << "[PAGE_DEBUG] page=" << page->title() << " sys_page=" << sys_page << " modified_page=" << modified_page
+                                           << " colour=" << (clr == &m_modified_label_clr ? "modified" : clr == &m_sys_label_clr ? "sys" : "default");
 
             if (selection == title) {
                 m_is_nonsys_values = page->m_is_nonsys_values;
