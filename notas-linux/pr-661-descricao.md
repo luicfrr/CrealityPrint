@@ -28,8 +28,10 @@ The printer option "Time cost" (per hour) existed but nothing used it; the previ
 - **Fix** (`GCodeRenderer/BaseRenderer.cpp`): the preview summary and the filament legend show "Machine Cost" (hourly rate x estimated time) and "Total Cost", and the all-plates summary adds the machine cost to its total. Shown only when the rate is above zero. `total_cost` (filament) and the G-code output are unchanged.
 
 ### 5. Ctrl+C / Ctrl+V and Delete on objects only work after several clicks
-- **Cause:** after a click in the ImGui object list, ImGui reports `WantCaptureKeyboard`, and `GLCanvas3D::on_char()` returned before the clipboard shortcuts and the Delete key were handled.
-- **Fix** (`GLCanvas3D.cpp`): Ctrl+C/V/X and Delete (and Backspace on macOS, which the same handler treats as Delete) pass through unless an ImGui text field is being edited.
+Two causes, one for each place an object is selected:
+
+- **Object list:** after a click in the ImGui object list, ImGui reports `WantCaptureKeyboard`, and `GLCanvas3D::on_char()` returned before the clipboard shortcuts and the Delete key were handled. **Fix** (`GLCanvas3D.cpp`): Ctrl+C/V/X and Delete (and Backspace on macOS, which the same handler treats as Delete) pass through unless an ImGui text field is being edited.
+- **3D scene:** on Linux the settings tabs give their page list the keyboard focus on every page change, so that a text field being edited loses it and commits its value. Selecting an object in the scene also changes the object settings page, so the focus left the scene right after the click, and the keys went to the page list; a second click on the same object, which changes no page, made them work. **Fix** (`Tab.cpp`, Linux only): the page list takes the focus only when it is already inside the settings panel, which still covers the case that code exists for.
 
 ### 6. By-object printing refuses a short part printed before a tall one
 A 1 mm plate printed first next to a tall vase was rejected as "too close to others", although the hotend passes over it.
@@ -93,7 +95,7 @@ Built with the repository's Flatpak manifest (GNOME SDK 50, Clang 21) on Fedora 
 - **Dark mode:** toggled in Preferences, restarted, and confirmed the UI and native menus/dialogs follow it.
 - **Flushing volumes:** the filament colour icons appear in the header and first column, and the Multiplier value is visible and editable in dark mode (screenshots above).
 - **Machine cost:** sliced with "Time cost" set; the preview shows machine and total cost.
-- **Clipboard and Delete:** clicked an object in the object list and used Ctrl+C / Ctrl+V and Delete right away. Delete inside the rename field still edits the text.
+- **Clipboard and Delete:** opened a project, clicked an object once, in the object list and in the 3D scene, and used Delete, Ctrl+C / Ctrl+V and Ctrl+X right away. Delete inside the rename field still edits the text. Logs taken while diagnosing the scene case showed the keys not reaching the main window before the fix.
 - **Sequential clearance:** a 1 mm part listed before a tall vase within the extruder clearance radius now slices.
 - **Undo arrow:** the stray arrow behind the process preset combo is gone; the undo arrow on the right still appears when a value is changed.
 - **Context menu:** right-click on an object and on a plate in the object list; the menu stays open after the button is released and its actions work.

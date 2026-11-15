@@ -69,6 +69,8 @@ Arquivo: `src/slic3r/GUI/GCodeRenderer/BaseRenderer.cpp`.
 
 A lista de objetos é desenhada com ImGui dentro da área 3D. Depois de um clique nela, o ImGui reivindicava o teclado (`WantCaptureKeyboard`), e o `GLCanvas3D::on_char` descartava a tecla antes de chegar ao atalho de copiar. Só um clique em outro ponto da placa devolvia o teclado. Agora Ctrl+C, Ctrl+V, Ctrl+X e Delete (no macOS também Backspace) passam sempre, a não ser que um campo de texto esteja em edição. O Delete tinha o mesmo problema e foi incluído depois.
 
+Havia uma segunda causa, para a seleção feita na **cena 3D**, encontrada com um build de diagnóstico: no Linux, as abas de configuração passam o foco do teclado para a lista de páginas sempre que a página muda (para um campo em edição perder o foco e gravar o valor). Selecionar um objeto troca a página de configurações do objeto, então o foco saía da cena logo depois do clique, e as teclas iam para a lista de páginas. Um segundo clique no mesmo objeto não troca de página, e por isso funcionava. Agora a lista de páginas só pega o foco quando ele já está dentro das configurações (`src/slic3r/GUI/Tab.cpp`).
+
 Arquivo: `src/slic3r/GUI/GLCanvas3D.cpp`.
 
 ## 6. Colisão na impressão por objeto
