@@ -20652,17 +20652,12 @@ void Plater::remove_selected()
 {
     /*if (p->get_selection().is_empty())
         return;*/
-    if (p->get_curr_selection().is_empty()) {
-        BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] remove_selected: selection empty"; // local diagnostics
+    if (p->get_curr_selection().is_empty())
         return;
-    }
 
     // BBS: check before deleting object
-    if (!p->can_delete()) {
-        BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] remove_selected: can_delete() is false"; // local diagnostics
+    if (!p->can_delete())
         return;
-    }
-    BOOST_LOG_TRIVIAL(warning) << "[DELETE_DEBUG] remove_selected: deleting";
 
     Plater::TakeSnapshot snapshot(this, "Delete Selected Objects");
     get_ui_job_worker().cancel_all();
