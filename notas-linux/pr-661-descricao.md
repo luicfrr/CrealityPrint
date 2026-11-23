@@ -1,8 +1,8 @@
 # Description
 
-Fixes for problems found while using CrealityPrint 7.3.1 daily on Fedora 45 (GNOME 50, Wayland, Flatpak) with a Creality Hi + CFS. Each item lists the cause and the change. Windows and macOS behaviour is unchanged except where noted (items 1, 4, 5, 8 and 10 are cross-platform fixes).
+Fixes for problems found while using CrealityPrint 7.3.1 and 7.3.2 daily on Fedora 45 (GNOME 50, Wayland, Flatpak) with a Creality Hi + CFS. Each item lists the cause and the change. Windows and macOS behaviour is unchanged except where noted (items 1, 4, 5, 8 and 10 are cross-platform fixes).
 
-The branch is merged with the current `master` (`sync: update sources from release-261130 after v7.3.1`); the one conflict, in `WipeTowerDialog.cpp`, is described in item 3.
+The branch is merged with the current `master` (`sync: update sources from release-261130 after v7.3.1`, tagged `v7.3.2`); the one conflict, in `WipeTowerDialog.cpp`, is described in item 3.
 
 ### 1. Reopening a project loses the printer, process and filament presets
 After saving a project with user presets and opening it again, the printer came back as a new `Padrão Hi 0.4 Priced (project.3mf)` preset, the process as `Default Setting` and the filaments as `Default Filament`, although the saved values were identical to the local presets.
@@ -62,7 +62,7 @@ The preset name shows `*` when a filament has unsaved changes, but in the filame
 
 ### 11. Robustness and Flatpak build
 - `PresetUpdater.cpp`: a missing or unreadable `resources/printers/version.txt` no longer aborts startup. Assigning the empty string to `Version::config_version` went through Semver's throwing constructor; the file is ignored by `.gitignore`, so builds from a clean checkout crashed with `Could not parse version string:`.
-- `flatpak/io.github.crealityofficial.CrealityPrint.yml`: builds 7.3.1 (so it uses the same `Creality Print/7.3` data folder as the release); the dependency module only receives `deps/` and `cmake/`, so source changes no longer invalidate its cache; the app module's `env` moved under `build-options`, where flatpak-builder reads it; and `run_gettext.sh` is run through `bash`, since it is not executable in the repository.
+- `flatpak/io.github.crealityofficial.CrealityPrint.yml`: builds 7.3.2, the version of the current `master` (so it uses the same `Creality Print/7.3` data folder as the release); the dependency module only receives `deps/` and `cmake/`, so source changes no longer invalidate its cache; the app module's `env` moved under `build-options`, where flatpak-builder reads it; and `run_gettext.sh` is run through `bash`, since it is not executable in the repository.
 
 No breaking changes or new dependencies.
 
