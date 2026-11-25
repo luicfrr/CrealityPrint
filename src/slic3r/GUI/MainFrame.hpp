@@ -447,6 +447,7 @@ public:
     mutable bool          m_print_enable{ true };
     bool get_enable_slice_status();
     bool get_enable_print_status(bool is_all_or_any_of_them = true);
+    bool confirm_print_with_gcode_conflicts();
     void  trackEvent(const std::string& event, const std::string& data);
     //BBS
     void update_side_button_style();

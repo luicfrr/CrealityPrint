@@ -2208,6 +2208,9 @@ void MainFrame::print_plate(PrintSelectType tp){
     if (!get_enable_print_status(false))
         return;
 
+    if (tp != eUpload3mf && !confirm_print_with_gcode_conflicts())
+        return;
+
     if (wxGetApp().preset_bundle->machine_is_belt()) {
         m_plater->restore_belt_trans();
     }
@@ -2583,6 +2586,41 @@ bool MainFrame::get_enable_slice_status()
 
     BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(": m_slice_select %1%, enable= %2% ")%m_slice_select %enable;
     return enable;
+}
+
+// Slicing reports crossing G-code paths (between two objects, or between an
+// object and the prime tower) only in a notification, which newer notifications
+// can push out of sight. Ask before such G-code is sent or exported.
+bool MainFrame::confirm_print_with_gcode_conflicts()
+{
+    const bool all_plates = m_print_select == ePrintAll || m_print_select == eExportAllSlicedFile ||
+                            m_print_select == eSendToPrinterAll;
+    PartPlateList& plate_list = m_plater->get_partplate_list();
+    const PartPlate* current_plate = plate_list.get_curr_plate();
+
+    wxString conflicts;
+    for (int i = 0; i < plate_list.get_plate_count(); ++i) {
+        PartPlate* plate = plate_list.get_plate(i);
+        if (plate == nullptr || (!all_plates && plate != current_plate) || !plate->is_slice_result_valid())
+            continue;
+        const GCodeProcessorResult* result = plate->get_slice_result();
+        if (result == nullptr || !result->conflict_result)
+            continue;
+        const auto& conflict = *result->conflict_result;
+        // A null object pointer stands for the prime tower.
+        const wxString name1 = conflict._obj1 == nullptr ? _L("Prime tower") : from_u8(conflict._objName1);
+        const wxString name2 = conflict._obj2 == nullptr ? _L("Prime tower") : from_u8(conflict._objName2);
+        conflicts += "\n" + wxString::Format(_L("Plate %d: %s and %s, from z = %.2f mm"), i + 1, name1, name2, conflict._height);
+    }
+    if (conflicts.empty())
+        return true;
+
+    MessageDialog dlg(this,
+                      _L("The G-code paths of these parts cross each other. The nozzle will run into what is already printed there, "
+                         "which can ruin the print:") +
+                          "\n" + conflicts + "\n\n" + _L("Move them apart and slice again. Continue anyway?"),
+                      _L("G-code path conflict"), wxYES | wxNO | wxICON_WARNING);
+    return dlg.ShowModal() == wxID_YES;
 }
 
 bool MainFrame::get_enable_print_status(bool is_all_or_any_of_them)
