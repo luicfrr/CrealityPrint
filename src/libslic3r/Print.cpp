@@ -5923,7 +5923,9 @@ void Print::_make_wipe_tower()
                                                 wipe_tower.get_brim_width(),
                                                 config().prime_tower_enhance_type == PrimeTowerEnhanceType::pteCone,
                                                 m_wipe_tower_data.stable_cone, &wipe_tower.get_outer_wall());
-            const Vec3d origin = Vec3d::Zero();
+            // The conflict checker compares this tower with objects in bed coordinates,
+            // while the tower position is relative to the plate.
+            const Vec3d origin = this->get_plate_origin();
             if (config().prime_tower_enhance_type == PrimeTowerEnhanceType::pteCornerRib && m_wipe_tower_data.bbx.defined) {
                 const Vec2d collision_size = m_wipe_tower_data.bbx.size();
                 const Vec2f collision_pos = wipe_tower.position() +
@@ -6046,7 +6048,9 @@ void Print::_make_wipe_tower()
 
         m_wipe_tower_data.used_filament         = wipe_tower.get_used_filament();
         m_wipe_tower_data.number_of_toolchanges = wipe_tower.get_number_of_toolchanges();
-        const Vec3d origin                      = Vec3d::Zero();
+        // The conflict checker compares this tower with objects in bed coordinates,
+        // while the tower position is relative to the plate.
+        const Vec3d origin                      = this->get_plate_origin();
         m_fake_wipe_tower.set_fake_extrusion_data(wipe_tower.position(), wipe_tower.width(), wipe_tower.get_wipe_tower_height(),
                                                   config().initial_layer_print_height, m_wipe_tower_data.depth,
                                                   m_wipe_tower_data.z_and_depth_pairs, m_wipe_tower_data.brim_width,
