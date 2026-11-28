@@ -1,12 +1,12 @@
 # Crashes da lista de objetos, do fechamento e do build com CMake 4.5
 
-Investigação de 23/11/2026, no `linux-dev`. São três correções, todas commitadas neste branch. A primeira também foi enviada ao repositório oficial no [PR 671](https://github.com/CrealityOfficial/CrealityPrint/pull/671) (branch `fix/linux-object-list-delete`); as outras duas não estão em nenhum PR.
+Investigação de 23/11/2026, no `linux-dev`. São três correções, todas commitadas neste branch e enviadas ao repositório oficial em PRs separados, cada um a partir do `master` oficial (`9c930d82`): [671](https://github.com/CrealityOfficial/CrealityPrint/pull/671) (`fix/linux-object-list-delete`), [672](https://github.com/CrealityOfficial/CrealityPrint/pull/672) (`fix/backup-callback-on-exit`) e [673](https://github.com/CrealityOfficial/CrealityPrint/pull/673) (`fix/boost-locale-cmake4`).
 
 | Correção | Arquivo | Estado |
 |---|---|---|
 | 1. Crash ao fazer "Assemble" ou apagar objetos com várias partes | `src/slic3r/GUI/ObjectDataViewModel.cpp` | Testada; enviada no PR 671 |
-| 2. Crash ao fechar o app (thread de backup) | `src/libslic3r/Format/bbs_3mf.cpp` | Compilada e instalada, **ainda não testada** |
-| 3. Build quebrado pelo CMake 4.5 do GNOME SDK | `deps/Boost/Boost.cmake`, `deps/Boost/apply-locale-source-group-patch.cmake` | Testada: o build completo passou |
+| 2. Crash ao fechar o app (thread de backup) | `src/libslic3r/Format/bbs_3mf.cpp` | Sem crash em ~30 fechamentos; enviada no PR 672 |
+| 3. Build quebrado pelo CMake 4.5 do GNOME SDK | `deps/Boost/Boost.cmake`, `deps/Boost/apply-locale-source-group-patch.cmake` | Testada: o build completo passou; enviada no PR 673 |
 
 ## 1. Crash da lista de objetos ("Assemble" / apagar objeto)
 
@@ -67,8 +67,8 @@ O loop da thread de backup (`_BBS_Backup_Manager::operator()` em `bbs_3mf.cpp`) 
 ### Correção
 No momento da chamada, que já acontece com o lock pego, a thread usa o `m_post_callback` atual em vez da cópia. Depois que `shutdown()` limpa o callback, ele não é mais chamado. Se uma chamada estiver em andamento, `set_post_callback()` espera o lock, e a janela ainda existe.
 
-### Falta
-Testar fechando o app várias vezes, de preferência logo depois de alterar o projeto, quando o backup roda. Não deve aparecer core dump novo em `coredumpctl list`.
+### Teste
+De 23/11 a 27/11 o app foi aberto e fechado cerca de 30 vezes sem nenhum core dump. Antes eram dois crashes ao fechar na mesma noite. Como depende de timing (fechar durante um backup), isso é um bom indício, não uma prova. PR: [672](https://github.com/CrealityOfficial/CrealityPrint/pull/672), descrição em [`pr-672-descricao.md`](pr-672-descricao.md).
 
 ## 3. Build quebrado pelo CMake 4.5 (GNOME SDK de 19/11)
 
@@ -84,7 +84,7 @@ CMake Error at libs/locale/CMakeLists.txt:231 (source_group):
 ### Correção
 `deps/Boost/apply-locale-source-group-patch.cmake` é aplicado como `PATCH_COMMAND` do Boost em todas as plataformas, antes do patch de zstd no macOS. Antes do `source_group(TREE …/include/boost/locale …)`, ele insere um `list(FILTER sources_inc INCLUDE REGEX "(^|/)include/boost/locale/")`. O script é idempotente e não faz nada se a linha não existir, por exemplo numa versão mais nova do Boost.
 
-Também pode valer como PR para o repositório oficial, porque qualquer build com CMake ≥ 4.5 bate nesse erro.
+Enviada ao repositório oficial no PR [673](https://github.com/CrealityOfficial/CrealityPrint/pull/673), porque qualquer build com CMake ≥ 4.5 bate nesse erro. A descrição está em [`pr-673-descricao.md`](pr-673-descricao.md). No macOS e no Windows não foi compilada.
 
 ## Como foi investigado (para retomar)
 

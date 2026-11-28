@@ -11,6 +11,8 @@ Este branch (`linux-dev`) parte de `fix/linux-gnome-and-project-presets`, o bran
 | [`protocolo-websocket-9999.md`](protocolo-websocket-9999.md) | Comandos que a aba Dispositivo envia à impressora (CFS, temperaturas, câmera…), para referência |
 | [`pr-661-descricao.md`](pr-661-descricao.md) | Descrição atual do PR no repositório oficial, para copiar no GitHub |
 | [`pr-671-descricao.md`](pr-671-descricao.md) | Descrição do PR 671 (crash da lista de objetos no GTK ao fazer "Assemble" ou apagar objetos com várias partes) |
+| [`pr-672-descricao.md`](pr-672-descricao.md) | Descrição do PR 672 (crash ao fechar o app, na thread de backup) |
+| [`pr-673-descricao.md`](pr-673-descricao.md) | Descrição do PR 673 (build do Boost 1.84 com CMake 4.x) |
 | [`crashes-lista-objetos-e-backup.md`](crashes-lista-objetos-e-backup.md) | Crash da lista de objetos ("Assemble"/apagar), crash ao fechar (backup) e build com CMake 4.5: causa, correção e o que falta testar |
 | [`../flatpak/build-fedora.sh`](../flatpak/build-fedora.sh) | Gera o Flatpak no Fedora sem sudo |
 | `../resources/printers/version.txt` | Versão dos perfis; o `.gitignore` do projeto o deixa de fora, e sem ele o app fechava ao abrir |
