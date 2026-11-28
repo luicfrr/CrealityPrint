@@ -1,10 +1,10 @@
 # Crashes da lista de objetos, do fechamento e do build com CMake 4.5
 
-Investigação de 23/11/2026, no `linux-dev`. São três correções, todas commitadas só neste branch. Nenhuma está nos PRs abertos (661 e 665).
+Investigação de 23/11/2026, no `linux-dev`. São três correções, todas commitadas neste branch. A primeira também foi enviada ao repositório oficial no [PR 671](https://github.com/CrealityOfficial/CrealityPrint/pull/671) (branch `fix/linux-object-list-delete`); as outras duas não estão em nenhum PR.
 
 | Correção | Arquivo | Estado |
 |---|---|---|
-| 1. Crash ao fazer "Assemble" ou apagar objetos com várias partes | `src/slic3r/GUI/ObjectDataViewModel.cpp` | Compilada e instalada, **ainda não testada** |
+| 1. Crash ao fazer "Assemble" ou apagar objetos com várias partes | `src/slic3r/GUI/ObjectDataViewModel.cpp` | Testada; enviada no PR 671 |
 | 2. Crash ao fechar o app (thread de backup) | `src/libslic3r/Format/bbs_3mf.cpp` | Compilada e instalada, **ainda não testada** |
 | 3. Build quebrado pelo CMake 4.5 do GNOME SDK | `deps/Boost/Boost.cmake`, `deps/Boost/apply-locale-source-group-patch.cmake` | Testada: o build completo passou |
 
@@ -42,10 +42,12 @@ gtk_tree_path_append_index(-1)
 ### Correção
 Em `ObjectDataViewModel::Delete()`, no ramo `itObject`, quando compilado para GTK (`#ifdef __WXGTK__`) os filhos não são mais apagados e notificados um por um. O único `ItemDeleted(prato, objeto)` que já existia remove a linha com toda a subárvore, e o destrutor de `ObjectDataViewModelNode` libera os filhos. Windows e macOS continuam como antes.
 
+### Teste
+De 23/11 a 27/11, com o build corrigido: "Assemble" de "Assembly" sem crash, e numa sessão de 24/11, 16 objetos de três partes apagados. Não apareceu nenhum `index_ >= 0` no journal (antes aparecia a cada exclusão dessas), nenhum abort e nenhum core dump.
+
 ### Falta
-- Testar: importar vários `.3mf` com objetos de várias partes, fazer "Assemble" e apagar objetos. Nenhum `index_ >= 0` deve aparecer no stderr (`journalctl --user -f`).
 - `DeleteChildren()` e `DeleteVolumeChildren()`, usado por exemplo em "juntar partes num objeto", também notificam filho por filho e devem ter o mesmo problema no GTK. Elas não apareceram em nenhuma captura e não foram alteradas.
-- Avaliar se a correção vale como PR para o repositório oficial. Seria um PR próprio, separado do 661 e do 665.
+- PR no repositório oficial: [671](https://github.com/CrealityOfficial/CrealityPrint/pull/671), criado a partir do `master` oficial (`9c930d82`), onde `ObjectDataViewModel.cpp` é idêntico. A descrição está em [`pr-671-descricao.md`](pr-671-descricao.md).
 
 ## 2. Crash ao fechar o app (thread de backup)
 
